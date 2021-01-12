@@ -2,6 +2,8 @@
 
 
 #include "LobbyGameMode.h"
+#include "TimerManager.h"
+#include "PuzzlePlatformsGameInstance.h"
 
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer) {
 
@@ -9,17 +11,29 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer) {
 
 	++NumberOfPlayers;
 
-	if (NumberOfPlayers >= 3) {
+	if (NumberOfPlayers >= 2) {
 
-		UWorld* World = GetWorld();
-
-		if (!ensure(World != nullptr)) return;
-
-		bUseSeamlessTravel = true;
-
-		World->ServerTravel("/Game/PuzzlePlatforms/Maps/ThirdPersonExampleMap");
+		GetWorldTimerManager().SetTimer(GameStartTimer, this, &ALobbyGameMode::StartGame, 10, false);
 
 	}
+
+}
+
+void ALobbyGameMode::StartGame() {
+
+	auto GameInstance = Cast<UPuzzlePlatformsGameInstance>(GetGameInstance());
+
+	if (!ensure(GameInstance != nullptr)) return;
+
+	GameInstance->StartSession();
+
+	UWorld* World = GetWorld();
+
+	if (!ensure(World != nullptr)) return;
+
+	bUseSeamlessTravel = true;
+
+	World->ServerTravel("/Game/PuzzlePlatforms/Maps/ThirdPersonExampleMap");
 
 }
 

@@ -11,7 +11,7 @@
 #include "MenuSystem/MainMenu.h"
 #include "MenuSystem/MenuWidget.h"
 
-const static FName SESSION_NAME = TEXT("My Session Name");
+const static FName SESSION_NAME = TEXT("GameSession");
 const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName");
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitializer& ObjectInitializer) {
@@ -55,6 +55,12 @@ void UPuzzlePlatformsGameInstance::Init() {
 		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::OnFindSessionsComplete);
 
 		SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UPuzzlePlatformsGameInstance::OnJoinSessionComplete);	
+	}
+
+	if (GEngine != nullptr) {
+
+		GEngine->OnNetworkFailure().AddUObject(this, &UPuzzlePlatformsGameInstance::OnNetworkFailure);
+
 	}
 	
 }
@@ -171,6 +177,12 @@ void UPuzzlePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, b
 
 }
 
+void UPuzzlePlatformsGameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString) {
+
+	LoadMainMenu();
+
+}
+
 void UPuzzlePlatformsGameInstance::CreateSession() {
 
 	if (SessionInterface.IsValid()) {
@@ -186,7 +198,7 @@ void UPuzzlePlatformsGameInstance::CreateSession() {
 			SessionSettings.bIsLANMatch = false;
 		}
 
-		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.NumPublicConnections = 5;
 
 		SessionSettings.bShouldAdvertise = true;
 
@@ -211,6 +223,16 @@ void UPuzzlePlatformsGameInstance::Join(uint32 Index) {
 	}
 
 	SessionInterface->JoinSession(0, SESSION_NAME, SessionSearch->SearchResults[Index]);
+}
+
+void UPuzzlePlatformsGameInstance::StartSession() {
+
+	if (SessionInterface.IsValid()) {
+
+		SessionInterface->StartSession(SESSION_NAME);
+
+	}
+
 }
 
 void UPuzzlePlatformsGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result) {

@@ -42,6 +42,8 @@ public:
 
 	virtual void RefreshingServerList() override;
 
+	void StartSession();
+
 private:
 
 	TSubclassOf<class UUserWidget> MenuClass;
@@ -63,6 +65,8 @@ private:
 	void OnFindSessionsComplete(bool Succeeded);
 
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	void OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 
 	void CreateSession();
 };
